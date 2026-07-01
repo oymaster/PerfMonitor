@@ -1,0 +1,87 @@
+syntax = "proto3";
+package monitor;
+
+import "cpu_load.proto";
+import "cpu_stat.proto";
+import "disk_info.proto";
+import "mem_info.proto";
+import "net_info.proto";
+
+// --- Metric: host-level snapshot ---
+message MonitorInfo {
+    string   hostname       = 1;
+    string   ip             = 2;
+    int64    timestamp      = 3;   // unix seconds
+
+    CpuLoad  cpu_load       = 4;
+    CpuStat  cpu_stat       = 5;
+    MemInfo  mem            = 6;
+    repeated DiskInfo disks = 7;
+    repeated NetInfo  nets  = 8;
+
+    // eBPF observe events
+    ObserveBatch   observe_batch = 9;
+
+    // eBPF diagnose events (offcpu/profile flamegraph paths)
+    repeated DiagnoseEvent diagnose_events = 10;
+}
+
+// --- Observe: process lifecycle + tcp flow ---
+message ObserveBatch {
+    repeated ProcessEvent process_events = 1;
+    repeated FlowEvent    flow_events    = 2;
+}
+
+message ProcessEvent {
+    string comm     = 1;
+    uint32 pid      = 2;
+    uint32 ppid     = 3;
+    string filename = 4;
+    string event    = 5;   // "exec" | "exit"
+    int64  ts_ns    = 6;
+}
+
+message FlowEvent {
+    // identity
+    uint32 pid       = 1;
+    string comm      = 2;
+    string ppid_comm = 3;
+    string exe       = 4;
+    // connection
+    string src_ip    = 5;
+    uint32 src_port  = 6;
+    string dst_ip    = 7;
+    uint32 dst_port  = 8;
+    // stats
+    uint64 bytes_sent         = 9;
+    uint64 bytes_recv         = 10;
+    uint64 connect_latency_ns = 11;
+    string state              = 12;
+    uint64 start_ns           = 13;
+    uint64 last_ns            = 14;
+}
+
+// --- Diagnose: on-demand deep-dive ---
+message DiagnoseEvent {
+    string type          = 1;  // "offcpu" | "profile" | "perf"
+    string process_name  = 2;
+    string thread_name   = 3;
+    string file_path     = 4;  // flamegraph / perf.data path
+    int64  timestamp     = 5;
+    double cpu_percent   = 6;  // for perf trigger
+}
+
+// --- gRPC Service ---
+service MonitorService {
+    rpc SetMonitorInfo(MonitorInfo) returns (SetResponse);
+    rpc GetMonitorInfo(GetRequest)  returns (MonitorInfo);
+}
+
+message SetResponse {
+    bool   ok      = 1;
+    string message = 2;
+}
+
+message GetRequest {
+    string hostname = 1;
+}

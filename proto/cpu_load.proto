@@ -1,0 +1,9 @@
+syntax = "proto3";
+package monitor;
+
+message CpuLoad {
+    double load_1m  = 1;
+    double load_5m  = 2;
+    double load_15m = 3;
+    int32  nr_cores = 4;
+}

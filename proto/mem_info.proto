@@ -1,0 +1,14 @@
+syntax = "proto3";
+package monitor;
+
+message MemInfo {
+    double total_gb       = 1;
+    double used_gb        = 2;
+    double free_gb        = 3;
+    double available_gb   = 4;
+    double cached_gb      = 5;
+    double buffers_gb     = 6;
+    double swap_total_gb  = 7;
+    double swap_used_gb   = 8;
+    double used_pct       = 9;
+}

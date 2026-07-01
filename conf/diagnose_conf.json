@@ -1,0 +1,41 @@
+{
+    "description": "Default diagnose configuration for monitor_system",
+    "create_time": "2026-06-29 10:00:00",
+
+    "offcpu": [
+        {
+            "process_name": "",
+            "thread_name": "",
+            "min_block_us": 1,
+            "max_block_us": 1000000,
+            "interval_s": 10,
+            "limit_file_size_mb": 50,
+            "limit_file_num": 3
+        }
+    ],
+
+    "profile": [
+        {
+            "process_name": "",
+            "thread_name": "",
+            "max_nr": 1000,
+            "max_size_kb": 4096,
+            "cpus": "0",
+            "cpu_threshold_pct": 50
+        }
+    ],
+
+    "perf": {
+        "cpu_threshold_pct": 5,
+        "overflow_duration_s": 10,
+        "target_processes": ["yes"],
+        "target_threads": []
+    },
+
+    "paths": {
+        "offcpu_bin": "/usr/local/bin/offcpu_wrapper",
+        "profile_bin": "/usr/local/bin/profile_wrapper",
+        "perf_bin": "/usr/bin/perf",
+        "output_dir": "/tmp/monitor_system/diagnose"
+    }
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package monitor;
+
+message CpuStat {
+    double user_pct     = 1;
+    double system_pct   = 2;
+    double idle_pct     = 3;
+    double iowait_pct   = 4;
+    double steal_pct    = 5;
+    double softirq_pct  = 6;
+}

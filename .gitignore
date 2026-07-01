@@ -1,0 +1,6 @@
+build/
+.claude/
+*.pb.h
+*.pb.cc
+*.grpc.pb.h
+*.grpc.pb.cc

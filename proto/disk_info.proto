@@ -1,0 +1,10 @@
+syntax = "proto3";
+package monitor;
+
+message DiskInfo {
+    string device      = 1;
+    double read_mbps   = 2;
+    double write_mbps  = 3;
+    double iops        = 4;
+    double io_latency_ms = 5;
+}
