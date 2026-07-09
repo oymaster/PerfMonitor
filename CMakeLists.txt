@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(BUILD_TESTS "Build unit tests" OFF)
+option(BUILD_BENCHMARKS "Build benchmark tools" OFF)
 option(ENABLE_EBPF  "Enable eBPF observe & diagnose" ON)
 option(ENABLE_PERF  "Enable perf-triggered diagnose" ON)
 
@@ -16,4 +17,8 @@ add_subdirectory(manager)
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()

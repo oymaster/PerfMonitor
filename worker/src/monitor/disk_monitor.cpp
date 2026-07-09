@@ -16,24 +16,30 @@ struct DiskRaw {
 
 static std::unordered_map<std::string, DiskRaw> prev_map;
 
+static bool ParseDiskStatsLine(const std::string& line, std::string& dev, DiskRaw& r) {
+    std::istringstream ls(line);
+    int major, minor;
+    uint64_t reads_merged, read_time_ms;
+    uint64_t writes_merged, write_time_ms;
+    uint64_t ios_in_progress;
+    if (!(ls >> major >> minor >> dev
+             >> r.reads_done >> reads_merged >> r.read_sectors >> read_time_ms
+             >> r.writes_done >> writes_merged >> r.write_sectors >> write_time_ms
+             >> ios_in_progress >> r.io_ticks)) {
+        return false;
+    }
+    return true;
+}
+
 bool DiskMonitor::Init() {
     // read once to seed prev_map
     auto content = ReadFile("/proc/diskstats");
     std::istringstream iss(content);
     std::string line;
     while (std::getline(iss, line)) {
-        std::istringstream ls(line);
-        int major, minor;
         std::string dev;
         DiskRaw r;
-        ls >> major >> minor >> dev
-           >> r.reads_done >> std::ws; // skip merged
-        uint64_t dummy;
-        ls >> dummy >> dummy;          // read_merged, read_sectors_old
-        ls >> r.read_sectors >> dummy; // read_time_ms
-        ls >> r.writes_done >> dummy >> dummy;
-        ls >> r.write_sectors >> dummy;
-        ls >> dummy >> r.io_ticks;
+        if (!ParseDiskStatsLine(line, dev, r)) continue;
         if (!dev.empty() && dev.find("loop") != 0 && dev.find("ram") != 0) {
             prev_map[dev] = r;
         }
@@ -48,18 +54,9 @@ void DiskMonitor::Collect() {
     std::unordered_map<std::string, DiskRaw> cur_map;
 
     while (std::getline(iss, line)) {
-        std::istringstream ls(line);
-        int major, minor;
         std::string dev;
         DiskRaw r;
-        ls >> major >> minor >> dev
-           >> r.reads_done;
-        uint64_t dummy;
-        ls >> dummy >> dummy;
-        ls >> r.read_sectors >> dummy;
-        ls >> r.writes_done >> dummy >> dummy;
-        ls >> r.write_sectors >> dummy;
-        ls >> dummy >> r.io_ticks;
+        if (!ParseDiskStatsLine(line, dev, r)) continue;
 
         if (dev.empty() || dev.find("loop") == 0 || dev.find("ram") == 0) continue;
         cur_map[dev] = r;
